@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "obfuscated-string-recovery"
+version = "0.1.0"
+description = "Bounded offline stack-string reconstruction for self-owned ELF test objects"
+readme = "项目文档/README.md"
+requires-python = ">=3.11"
+authors = [{name = "dhtfish98"}]
+license = "MIT"
+license-files = ["项目文档/LICENSE"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/obfuscated_string_recovery"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/obfuscated_string_recovery",
+  "tests",
+  "tools",
+  "项目文档",
+  ".github/workflows",
+  ".gitignore",
+  "Build/.gitignore",
+  "pyproject.toml",
+]

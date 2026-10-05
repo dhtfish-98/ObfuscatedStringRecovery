@@ -1,0 +1,43 @@
+name: Verify bounded static string recovery
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.11", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Ensure fixture compiler is present
+        run: clang --version
+      - name: Bootstrap build dependencies under Build
+        run: |
+          mkdir -p Build/pip-cache
+          python -m venv Build/bootstrap
+          PIP_CACHE_DIR="$PWD/Build/pip-cache" Build/bootstrap/bin/python -m pip install build hatchling
+      - name: Verify repository, source archive, and installed wheel
+        run: Build/bootstrap/bin/python tools/run_validation.py
+      - name: Check source tree stays clean
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: static-recovery-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: |
+            Build/validation.json
+            Build/*.log
+          if-no-files-found: warn
